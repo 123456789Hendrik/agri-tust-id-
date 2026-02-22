@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agri-Trust ID — Infrastructure Publique Numérique</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #2C1A0E;
+    --earth: #5C3D2E;
+    --clay: #A0522D;
+    --gold: #C8972A;
+    --harvest: #E8B84B;
+    --leaf: #3D6B3C;
+    --sage: #6A9E5A;
+    --mist: #D4E6C3;
+    --cream: #F5EDD8;
+    --chalk: #FAF6EE;
+    --ink: #1A120A;
+    --verified: #2E7D32;
+    --pending: #E65100;
+    --info: #1565C0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--chalk);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--soil);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+    height: 56px;
+    border-bottom: 2px solid var(--gold);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    color: var(--harvest);
+    letter-spacing: 0.05em;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .nav-logo span { color: var(--mist); font-weight: 400; }
+  .nav-links { display: flex; gap: 0.25rem; }
+  .nav-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem; font-weight: 500;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    color: var(--mist);
+    letter-spacing: 0.05em;
+  }
+  .nav-btn:hover { border-color: var(--gold); color: var(--harvest); }
+  .nav-btn.active { background: var(--gold); color: var(--soil); border-color: var(--gold); }
+  .nav-status {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.65rem; color: var(--sage);
+  }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ─── PAGES ─── */
+  .page { display: none; padding-top: 56px; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: var(--soil);
+    position: relative; overflow: hidden;
+    padding: 5rem 2rem 4rem;
+    min-height: 92vh;
+    display: flex; align-items: center;
+  }
+  .hero-grain {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none; opacity: 0.5;
+  }
+  .hero-geo {
+    position: absolute; right: -80px; top: -80px;
+    width: 500px; height: 500px;
+    border: 1px solid rgba(200,151,42,0.15);
+    border-radius: 50%;
+  }
+  .hero-geo::after {
+    content: '';
+    position: absolute; inset: 40px;
+    border: 1px solid rgba(200,151,42,0.1);
+    border-radius: 50%;
+  }
+  .hero-content { position: relative; max-width: 700px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(200,151,42,0.15);
+    border: 1px solid rgba(200,151,42,0.3);
+    border-radius: 2px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.65rem; color: var(--harvest);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 2rem;
+    animation: fadeDown 0.6s ease both;
+  }
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 600; line-height: 1.05;
+    color: var(--cream);
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  .hero h1 em { color: var(--harvest); font-style: normal; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .hero-sub {
+    font-size: 0.85rem; color: rgba(212,230,195,0.7);
+    line-height: 1.8; max-width: 520px;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-ctas {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .btn-primary {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 0.8rem; letter-spacing: 0.08em;
+    padding: 0.75rem 1.8rem;
+    background: var(--gold); color: var(--soil);
+    border: none; border-radius: 2px; cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-primary:hover { background: var(--harvest); transform: translateY(-1px); }
+  .btn-outline {
+    font-family: 'Syne', sans-serif; font-weight: 600;
+    font-size: 0.8rem; letter-spacing: 0.08em;
+    padding: 0.75rem 1.8rem;
+    background: transparent; color: var(--mist);
+    border: 1px solid rgba(212,230,195,0.3); border-radius: 2px;
+    cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+  }
+  .btn-outline:hover { border-color: var(--harvest); color: var(--harvest); }
+  .hero-stats {
+    position: absolute; bottom: 2.5rem; right: 2rem;
+    display: flex; gap: 2rem;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+  .hero-stat { text-align: right; }
+  .hero-stat-num {
+    font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800;
+    color: var(--harvest);
+  }
+  .hero-stat-label { font-size: 0.6rem; color: rgba(212,230,195,0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ─── SECTION COMMON ─── */
+  .section { padding: 4rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.65rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--clay); margin-bottom: 0.5rem;
+  }
+  .section-headline {
+    font-family: 'Fraunces', serif; font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 600; color: var(--soil); line-height: 1.2;
+    margin-bottom: 3rem;
+  }
+
+  /* ─── DASHBOARD PAGE ─── */
+  .dash-grid { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+  
+  /* Farmer Card */
+  .farmer-card {
+    background: var(--soil); border-radius: 4px;
+    overflow: hidden; position: sticky; top: 76px;
+  }
+  .farmer-header {
+    background: linear-gradient(135deg, var(--earth), var(--soil));
+    padding: 1.5rem; border-bottom: 1px solid rgba(200,151,42,0.2);
+  }
+  .farmer-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--clay);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; margin-bottom: 1rem;
+    border: 2px solid var(--gold);
+  }
+  .farmer-name {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    color: var(--cream); font-size: 1rem; margin-bottom: 0.25rem;
+  }
+  .farmer-id { font-size: 0.6rem; color: var(--harvest); letter-spacing: 0.1em; }
+  .farmer-body { padding: 1.2rem; }
+  .farmer-field {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.65rem;
+  }
+  .farmer-field:last-child { border-bottom: none; }
+  .farmer-field-label { color: rgba(212,230,195,0.5); }
+  .farmer-field-val { color: var(--mist); font-weight: 500; }
+  .farmer-field-val.verified { color: var(--sage); }
+
+  /* SCA Score */
+  .score-panel {
+    background: white; border-radius: 4px;
+    border: 1px solid rgba(92,61,46,0.1);
+    overflow: hidden;
+  }
+  .score-header {
+    background: var(--leaf); padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .score-title {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    color: var(--mist); font-size: 0.8rem; letter-spacing: 0.05em;
+  }
+  .score-badge {
+    font-size: 0.6rem; padding: 0.2rem 0.6rem;
+    background: rgba(255,255,255,0.15); color: var(--mist);
+    border-radius: 20px; letter-spacing: 0.08em;
+  }
+  .score-body { padding: 2rem; }
+  .score-main { display: flex; align-items: center; gap: 2.5rem; margin-bottom: 2rem; }
+  .score-ring-wrap { position: relative; width: 140px; height: 140px; flex-shrink: 0; }
+  .score-ring-svg { width: 140px; height: 140px; transform: rotate(-90deg); }
+  .score-ring-bg { fill: none; stroke: #e8e0d0; stroke-width: 10; }
+  .score-ring-fill { fill: none; stroke: var(--leaf); stroke-width: 10; stroke-linecap: round;
+    stroke-dasharray: 378; stroke-dashoffset: 378;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1); }
+  .score-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .score-number {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; color: var(--soil);
+    line-height: 1;
+  }
+  .score-max { font-size: 0.6rem; color: var(--clay); }
+  .score-label-big { font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700; 
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--leaf); }
+  .score-details h4 {
+    font-family: 'Fraunces', serif; font-size: 1.4rem;
+    color: var(--soil); margin-bottom: 0.5rem;
+  }
+  .score-details p { font-size: 0.7rem; color: var(--clay); line-height: 1.7; }
+  .score-criteria { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .criterion {
+    background: var(--chalk); border-radius: 3px;
+    padding: 0.75rem; border-left: 3px solid var(--sage);
+  }
+  .criterion-label { font-size: 0.6rem; color: var(--clay); margin-bottom: 0.3rem; letter-spacing: 0.05em; }
+  .criterion-bar-wrap { height: 4px; background: #e0d8cc; border-radius: 2px; margin-bottom: 0.3rem; }
+  .criterion-bar { height: 4px; border-radius: 2px; background: var(--sage); transition: width 1s ease; }
+  .criterion-val { font-size: 0.65rem; font-weight: 500; color: var(--soil); }
+
+  /* Activity grid */
+  .activity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+  .activity-card {
+    background: white; border-radius: 4px;
+    border: 1px solid rgba(92,61,46,0.1); overflow: hidden;
+  }
+  .activity-card-head {
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid rgba(92,61,46,0.08);
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 0.7rem; color: var(--soil); letter-spacing: 0.05em;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .activity-card-body { padding: 1.2rem; }
+  .transaction-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.5rem 0; border-bottom: 1px solid var(--chalk);
+    font-size: 0.65rem;
+  }
+  .transaction-row:last-child { border-bottom: none; }
+  .tx-type { color: var(--clay); }
+  .tx-amount { font-weight: 600; color: var(--leaf); }
+  .tx-date { color: rgba(44,26,14,0.4); }
+  .tx-status {
+    font-size: 0.55rem; padding: 0.15rem 0.5rem; border-radius: 20px;
+    font-weight: 600; letter-spacing: 0.05em;
+  }
+  .tx-status.ok { background: rgba(61,107,60,0.1); color: var(--leaf); }
+  .tx-status.pending { background: rgba(230,81,0,0.1); color: var(--pending); }
+
+  /* ZKP PANEL */
+  .zkp-panel {
+    background: var(--soil); border-radius: 4px;
+    overflow: hidden;
+  }
+  .zkp-head {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(200,151,42,0.15);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .zkp-title {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    color: var(--cream); font-size: 0.75rem; letter-spacing: 0.05em;
+  }
+  .zkp-tag {
+    font-size: 0.55rem; padding: 0.2rem 0.6rem;
+    background: rgba(200,151,42,0.15); color: var(--harvest);
+    border-radius: 20px; letter-spacing: 0.08em; border: 1px solid rgba(200,151,42,0.3);
+  }
+  .zkp-body { padding: 1.5rem; }
+  .zkp-proof {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+    color: var(--sage); line-height: 2;
+    background: rgba(0,0,0,0.3); padding: 1rem;
+    border-radius: 3px; margin-bottom: 1rem;
+    border: 1px solid rgba(106,158,90,0.2);
+  }
+  .zkp-item { display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+  .zkp-key { color: rgba(212,230,195,0.5); }
+  .zkp-val { color: var(--harvest); }
+  .zkp-verify-btn {
+    width: 100%; padding: 0.7rem;
+    background: rgba(200,151,42,0.1); border: 1px solid rgba(200,151,42,0.3);
+    border-radius: 2px; color: var(--harvest);
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.7rem;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .zkp-verify-btn:hover { background: rgba(200,151,42,0.2); }
+  .zkp-result {
+    margin-top: 0.8rem; padding: 0.6rem 1rem;
+    background: rgba(61,107,60,0.15); border: 1px solid rgba(106,158,90,0.3);
+    border-radius: 2px; font-size: 0.65rem; color: var(--sage);
+    display: none;
+  }
+
+  /* ─── USSD PAGE ─── */
+  .ussd-wrap {
+    display: flex; gap: 3rem; align-items: start;
+    max-width: 900px; margin: 3rem auto; padding: 0 2rem;
+  }
+  .phone-frame {
+    width: 260px; flex-shrink: 0;
+    background: #111; border-radius: 28px;
+    padding: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  .phone-screen {
+    background: #1a3a1a; border-radius: 18px;
+    min-height: 400px; padding: 1.5rem 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    position: relative; overflow: hidden;
+  }
+  .phone-screen::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 40px;
+    background: rgba(0,0,0,0.3);
+    display: flex; align-items: center;
+  }
+  .phone-status {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 36px; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 1rem;
+    font-size: 0.55rem; color: rgba(106,158,90,0.7);
+    border-bottom: 1px solid rgba(106,158,90,0.1);
+  }
+  .phone-content { margin-top: 2.5rem; }
+  .ussd-header {
+    color: var(--harvest); font-size: 0.65rem; font-weight: 500;
+    border-bottom: 1px solid rgba(200,151,42,0.2); padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .ussd-line { font-size: 0.65rem; color: #7bc67e; line-height: 1.9; }
+  .ussd-line.dim { color: rgba(123,198,126,0.4); }
+  .ussd-line.highlight { color: var(--harvest); }
+  .ussd-input-line {
+    display: flex; align-items: center; gap: 0.3rem;
+    margin-top: 1rem; font-size: 0.65rem;
+  }
+  .ussd-prompt { color: var(--harvest); }
+  .ussd-cursor { width: 7px; height: 11px; background: #7bc67e; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .phone-keys {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 12px;
+  }
+  .phone-key {
+    background: #222; border: none; border-radius: 6px;
+    height: 36px; color: #ddd; font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem; cursor: pointer; transition: all 0.1s;
+  }
+  .phone-key:active, .phone-key:hover { background: #333; }
+  .phone-key.wide { grid-column: span 2; }
+  .phone-key.call { background: #1a4a1a; color: #7bc67e; }
+  .phone-key.end { background: #4a1a1a; color: #e07070; }
+  .ussd-info { flex: 1; }
+  .ussd-info h3 {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem;
+    color: var(--soil); margin-bottom: 0.75rem;
+  }
+  .ussd-info p { font-size: 0.75rem; color: var(--clay); line-height: 1.8; margin-bottom: 1.5rem; }
+  .ussd-steps { list-style: none; }
+  .ussd-step {
+    display: flex; gap: 1rem; align-items: flex-start;
+    margin-bottom: 1rem; font-size: 0.7rem; color: var(--clay);
+    line-height: 1.6;
+  }
+  .ussd-step-num {
+    width: 24px; height: 24px; flex-shrink: 0;
+    background: var(--leaf); color: var(--mist);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.6rem;
+  }
+  .ussd-nav-btns { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1.5rem; }
+  .ussd-nav-btn {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+    padding: 0.5rem 1rem; border: 1px solid rgba(92,61,46,0.2);
+    background: white; border-radius: 2px; cursor: pointer;
+    color: var(--clay); transition: all 0.15s; text-align: left;
+  }
+  .ussd-nav-btn:hover { border-color: var(--leaf); color: var(--leaf); background: rgba(61,107,60,0.05); }
+  .ussd-nav-btn.active-flow { border-color: var(--gold); color: var(--clay); background: rgba(200,151,42,0.05); }
+
+  /* ─── ADMIN PAGE ─── */
+  .admin-topbar {
+    background: white; border-bottom: 1px solid rgba(92,61,46,0.1);
+    padding: 1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .admin-topbar-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.85rem; color: var(--soil); }
+  .kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; padding: 1.5rem 2rem; }
+  .kpi-card {
+    background: white; border-radius: 4px;
+    border: 1px solid rgba(92,61,46,0.1);
+    padding: 1.2rem;
+  }
+  .kpi-val {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.8rem;
+    color: var(--soil); line-height: 1;
+  }
+  .kpi-label { font-size: 0.6rem; color: var(--clay); margin-top: 0.3rem; letter-spacing: 0.05em; text-transform: uppercase; }
+  .kpi-trend { font-size: 0.6rem; margin-top: 0.5rem; }
+  .kpi-trend.up { color: var(--leaf); }
+  .kpi-trend.down { color: var(--pending); }
+  .admin-content { display: grid; grid-template-columns: 1fr 380px; gap: 1.5rem; padding: 0 2rem 2rem; }
+  .table-card {
+    background: white; border-radius: 4px;
+    border: 1px solid rgba(92,61,46,0.1); overflow: hidden;
+  }
+  .table-head {
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid rgba(92,61,46,0.08);
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.7rem; color: var(--soil);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .table-search {
+    font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem;
+    padding: 0.3rem 0.8rem; border: 1px solid rgba(92,61,46,0.15);
+    border-radius: 2px; background: var(--chalk); color: var(--ink);
+    outline: none;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; font-family: 'Syne', sans-serif; font-size: 0.6rem;
+    font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--clay); padding: 0.6rem 1.2rem;
+    background: var(--chalk); border-bottom: 1px solid rgba(92,61,46,0.08);
+  }
+  td {
+    font-size: 0.65rem; color: var(--ink);
+    padding: 0.7rem 1.2rem; border-bottom: 1px solid rgba(92,61,46,0.05);
+  }
+  tr:hover td { background: rgba(212,230,195,0.2); }
+  .score-pill {
+    display: inline-block; padding: 0.15rem 0.6rem; border-radius: 20px;
+    font-weight: 600; font-size: 0.6rem;
+  }
+  .score-pill.high { background: rgba(61,107,60,0.1); color: var(--leaf); }
+  .score-pill.med { background: rgba(200,151,42,0.1); color: var(--gold); }
+  .score-pill.low { background: rgba(230,81,0,0.1); color: var(--pending); }
+  .action-btn {
+    font-size: 0.6rem; padding: 0.2rem 0.6rem;
+    border: 1px solid rgba(92,61,46,0.2); border-radius: 2px;
+    background: none; cursor: pointer; color: var(--clay);
+    transition: all 0.15s;
+  }
+  .action-btn:hover { border-color: var(--leaf); color: var(--leaf); }
+  .distrib-card {
+    background: white; border-radius: 4px;
+    border: 1px solid rgba(92,61,46,0.1); overflow: hidden;
+  }
+  .distrib-head {
+    padding: 0.8rem 1.2rem;
+    border-bottom: 1px solid rgba(92,61,46,0.08);
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.7rem; color: var(--soil);
+  }
+  .distrib-body { padding: 1.2rem; }
+  .distrib-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .distrib-icon { font-size: 1.2rem; }
+  .distrib-info { flex: 1; }
+  .distrib-name { font-size: 0.65rem; font-weight: 600; color: var(--soil); }
+  .distrib-sub { font-size: 0.6rem; color: var(--clay); }
+  .distrib-bar-wrap { height: 4px; background: var(--chalk); border-radius: 2px; margin-top: 0.3rem; }
+  .distrib-bar { height: 4px; border-radius: 2px; background: var(--sage); }
+  .distrib-pct { font-size: 0.6rem; color: var(--leaf); font-weight: 600; flex-shrink: 0; }
+
+  /* ─── ABOUT PAGE ─── */
+  .about-hero {
+    background: var(--soil); padding: 4rem 2rem;
+    text-align: center;
+  }
+  .about-hero h2 {
+    font-family: 'Fraunces', serif; font-size: clamp(2rem, 4vw, 3.2rem);
+    color: var(--cream); font-weight: 600; margin-bottom: 1rem;
+  }
+  .about-hero p { font-size: 0.8rem; color: rgba(212,230,195,0.7); max-width: 600px; margin: 0 auto; line-height: 1.8; }
+  .about-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 1.5rem; max-width: 900px; margin: 3rem auto; padding: 0 2rem; }
+  .about-block {
+    background: white; border-radius: 4px;
+    border: 1px solid rgba(92,61,46,0.1); padding: 1.5rem;
+  }
+  .about-block-icon { font-size: 1.8rem; margin-bottom: 0.75rem; }
+  .about-block h4 {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.85rem;
+    color: var(--soil); margin-bottom: 0.5rem; letter-spacing: 0.02em;
+  }
+  .about-block p { font-size: 0.68rem; color: var(--clay); line-height: 1.8; }
+  .team-section { max-width: 900px; margin: 0 auto; padding: 2rem; }
+  .team-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.65rem;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--clay); margin-bottom: 1.5rem;
+  }
+  .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .team-card {
+    background: white; border: 1px solid rgba(92,61,46,0.1);
+    border-radius: 4px; padding: 1.2rem; text-align: center;
+  }
+  .team-avatar {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: var(--leaf); margin: 0 auto 0.75rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+  }
+  .team-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.75rem; color: var(--soil); }
+  .team-role { font-size: 0.6rem; color: var(--clay); margin-top: 0.2rem; }
+  .team-spec {
+    margin-top: 0.5rem; font-size: 0.55rem;
+    background: rgba(61,107,60,0.08); color: var(--leaf);
+    padding: 0.15rem 0.5rem; border-radius: 20px; display: inline-block;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--soil); padding: 2rem;
+    text-align: center; font-size: 0.6rem;
+    color: rgba(212,230,195,0.3); border-top: 1px solid rgba(200,151,42,0.1);
+    letter-spacing: 0.08em;
+  }
+  footer span { color: var(--harvest); }
+
+  /* modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(44,26,14,0.7); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white; border-radius: 4px; max-width: 460px; width: 90%;
+    overflow: hidden; animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+  .modal-head {
+    background: var(--leaf); padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-head h3 { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--mist); font-size: 0.85rem; }
+  .modal-close { background: none; border: none; color: var(--mist); font-size: 1.2rem; cursor: pointer; }
+  .modal-body { padding: 1.5rem; }
+  .modal-body p { font-size: 0.72rem; color: var(--clay); line-height: 1.8; margin-bottom: 1rem; }
+  .qr-placeholder {
+    width: 120px; height: 120px; margin: 1rem auto;
+    background: var(--ink); border-radius: 4px;
+    display: grid; grid-template-columns: repeat(10,1fr);
+    gap: 1px; padding: 8px;
+  }
+  .qr-cell { background: white; border-radius: 1px; }
+  .qr-cell.dark { background: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">🌾 <span>Agri</span>-Trust ID</div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('home')">Accueil</button>
+    <button class="nav-btn" onclick="showPage('dashboard')">Mon Profil</button>
+    <button class="nav-btn" onclick="showPage('ussd')">Interface USSD</button>
+    <button class="nav-btn" onclick="showPage('admin')">Administration</button>
+    <button class="nav-btn" onclick="showPage('about')">À Propos</button>
+  </div>
+  <div class="nav-status"><div class="status-dot"></div>Système opérationnel</div>
+</nav>
+
+<!-- PAGE: HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-grain"></div>
+    <div class="hero-geo"></div>
+    <div class="hero-content">
+      <div class="hero-badge">🔐 Infrastructure Publique Numérique · Bénin · ENSGMM/UNSTIM</div>
+      <h1>L'identité<br>civile devient<br><em>identité économique.</em></h1>
+      <p class="hero-sub">
+        Agri-Trust ID connecte le registre RAVIP aux données terrain agricoles pour générer un <strong style="color:var(--mist)">Score de Confiance Agricole (SCA)</strong> certifié — sans exposer les données personnelles, sans smartphone, sans internet.
+      </p>
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="showPage('dashboard')">Voir mon profil agricole →</button>
+        <button class="btn-outline" onclick="showPage('ussd')">Simuler USSD</button>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">26.3%</div>
+        <div class="hero-stat-label">du PIB béninois</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">~40%</div>
+        <div class="hero-stat-label">réduction rejets crédit visée</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">8</div>
+        <div class="hero-stat-label">pays UEMOA cible</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Comment ça fonctionne</div>
+    <div class="section-headline">Quatre blocs. Une infrastructure robuste.</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem;">
+      <div class="about-block">
+        <div class="about-block-icon">📡</div>
+        <h4>ILRO — Collecte & Enrichissement</h4>
+        <p>Liaison RAVIP + données GPS terrain, groupements villageois, statistiques MAEP. Pipeline hors-ligne avec synchronisation différée.</p>
+      </div>
+      <div class="about-block">
+        <div class="about-block-icon">📊</div>
+        <h4>MASF — Moteur de Scoring</h4>
+        <p>Modèle probabiliste calibré sur les statistiques officielles béninoises. Traduit les données agricoles en un score d'éligibilité auditable.</p>
+      </div>
+      <div class="about-block">
+        <div class="about-block-icon">🔒</div>
+        <h4>MSN — Couche Cryptographique ZKP</h4>
+        <p>Preuves à Divulgation Nulle de Connaissance adaptées aux terminaux bas de gamme. Vérifiabilité sans exposition des données sensibles.</p>
+      </div>
+      <div class="about-block">
+        <div class="about-block-icon">📟</div>
+        <h4>USSD + QR — Interface Terrain</h4>
+        <p>Flux USSD pour feature phones, QR codes signés, authentification biométrique. Zéro smartphone, zéro connexion requise.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: DASHBOARD -->
+<div class="page" id="page-dashboard">
+  <div style="background:var(--chalk);border-bottom:1px solid rgba(92,61,46,0.1);padding:1rem 2rem;display:flex;align-items:center;gap:0.5rem;font-size:0.65rem;color:var(--clay);">
+    <span>🏠</span> / <span>Profil Agriculteur</span> / <span style="color:var(--soil);font-weight:600;">Amadou DOSSOU</span>
+  </div>
+  <div style="padding:1.5rem 2rem;">
+    <div class="dash-grid">
+      <!-- LEFT: Farmer card -->
+      <div>
+        <div class="farmer-card">
+          <div class="farmer-header">
+            <div class="farmer-avatar">👨‍🌾</div>
+            <div class="farmer-name">Amadou DOSSOU</div>
+            <div class="farmer-id">RAVIP · BJ-ATL-2024-048721</div>
+          </div>
+          <div class="farmer-body">
+            <div class="farmer-field"><span class="farmer-field-label">Commune</span><span class="farmer-field-val">Bohicon, Zou</span></div>
+            <div class="farmer-field"><span class="farmer-field-label">Culture principale</span><span class="farmer-field-val">Maïs, Manioc</span></div>
+            <div class="farmer-field"><span class="farmer-field-label">Superficie</span><span class="farmer-field-val">3.8 ha</span></div>
+            <div class="farmer-field"><span class="farmer-field-label">Groupement</span><span class="farmer-field-val verified">✓ GV Bohicon-Sud</span></div>
+            <div class="farmer-field"><span class="farmer-field-label">Statut RAVIP</span><span class="farmer-field-val verified">✓ Vérifié</span></div>
+            <div class="farmer-field"><span class="farmer-field-label">Dernière sync</span><span class="farmer-field-val">19 Fév 2026</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem;background:white;border:1px solid rgba(92,61,46,0.1);border-radius:4px;padding:1.2rem;">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.7rem;color:var(--soil);margin-bottom:1rem;">Actions rapides</div>
+          <button class="btn-primary" style="width:100%;margin-bottom:0.5rem;font-size:0.7rem;padding:0.6rem;" onclick="openModal()">🔐 Générer preuve ZKP</button>
+          <button class="btn-outline" style="width:100%;font-size:0.7rem;padding:0.6rem;color:var(--clay);border-color:rgba(92,61,46,0.2);" onclick="showPage('ussd')">📟 Accès USSD</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Score + Data -->
+      <div>
+        <div class="score-panel">
+          <div class="score-header">
+            <div class="score-title">Score de Confiance Agricole (SCA)</div>
+            <div class="score-badge">CERTIFIÉ · Campagne 2025/26</div>
+          </div>
+          <div class="score-body">
+            <div class="score-main">
+              <div class="score-ring-wrap">
+                <svg class="score-ring-svg" viewBox="0 0 140 140">
+                  <circle class="score-ring-bg" cx="70" cy="70" r="60"/>
+                  <circle class="score-ring-fill" id="scoreRing" cx="70" cy="70" r="60"/>
+                </svg>
+                <div class="score-center">
+                  <div class="score-number">742</div>
+                  <div class="score-max">/1000</div>
+                </div>
+              </div>
+              <div class="score-details">
+                <div class="score-label-big">Fiable</div>
+                <h4>Profil économique solide</h4>
+                <p>Score calculé sur 4 campagnes consécutives. Eligible aux programmes de microcrédit agricole jusqu'à <strong>750 000 FCFA</strong>. Subventions intrants : catégorie A.</p>
+              </div>
+            </div>
+            <div class="score-criteria">
+              <div class="criterion">
+                <div class="criterion-label">Superficie géolocalisée</div>
+                <div class="criterion-bar-wrap"><div class="criterion-bar" style="width:85%"></div></div>
+                <div class="criterion-val">85 / 100</div>
+              </div>
+              <div class="criterion">
+                <div class="criterion-label">Historique rendements</div>
+                <div class="criterion-bar-wrap"><div class="criterion-bar" style="width:78%"></div></div>
+                <div class="criterion-val">78 / 100</div>
+              </div>
+              <div class="criterion">
+                <div class="criterion-label">Régularité des ventes</div>
+                <div class="criterion-bar-wrap"><div class="criterion-bar" style="width:72%"></div></div>
+                <div class="criterion-val">72 / 100</div>
+              </div>
+              <div class="criterion">
+                <div class="criterion-label">Appartenance groupement</div>
+                <div class="criterion-bar-wrap"><div class="criterion-bar" style="width:95%"></div></div>
+                <div class="criterion-val">95 / 100</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-grid">
+          <div class="activity-card">
+            <div class="activity-card-head">📋 Historique de rendements (t/ha)</div>
+            <div class="activity-card-body">
+              <canvas id="yieldChart" height="120"></canvas>
+            </div>
+          </div>
+          <div class="activity-card">
+            <div class="activity-card-head">💳 Dernières transactions</div>
+            <div class="activity-card-body">
+              <div class="transaction-row">
+                <div><div class="tx-type">Subvention intrants</div><div class="tx-date">14 Fév 2026</div></div>
+                <div style="text-align:right"><div class="tx-amount">+45 000 FCFA</div><div class="tx-status ok">VALIDÉ</div></div>
+              </div>
+              <div class="transaction-row">
+                <div><div class="tx-type">Microcrédit agricole</div><div class="tx-date">02 Jan 2026</div></div>
+                <div style="text-align:right"><div class="tx-amount">+500 000 FCFA</div><div class="tx-status ok">APPROUVÉ</div></div>
+              </div>
+              <div class="transaction-row">
+                <div><div class="tx-type">Renouvellement SCA</div><div class="tx-date">19 Nov 2025</div></div>
+                <div style="text-align:right"><div class="tx-amount">Score: 742</div><div class="tx-status ok">CERTIFIÉ</div></div>
+              </div>
+              <div class="transaction-row">
+                <div><div class="tx-type">Subvention semences</div><div class="tx-date">30 Oct 2025</div></div>
+                <div style="text-align:right"><div class="tx-amount">+22 000 FCFA</div><div class="tx-status pending">EN COURS</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="activity-card" style="grid-column:span 2;">
+            <div class="activity-card-head">🔐 Preuve ZKP active</div>
+            <div class="activity-card-body" style="display:grid;grid-template-columns:1fr 260px;gap:1rem;align-items:start;">
+              <div>
+                <div class="zkp-proof">
+                  <div class="zkp-item"><span class="zkp-key">proof_type</span><span class="zkp-val">"Groth16"</span></div>
+                  <div class="zkp-item"><span class="zkp-key">circuit</span><span class="zkp-val">"sca_eligibility_v2"</span></div>
+                  <div class="zkp-item"><span class="zkp-key">pi_a</span><span class="zkp-val">["0x3f7a...","0x8c1d..."]</span></div>
+                  <div class="zkp-item"><span class="zkp-key">pi_b</span><span class="zkp-val">[["0x4e2f...","0x7a9b..."]]</span></div>
+                  <div class="zkp-item"><span class="zkp-key">pi_c</span><span class="zkp-val">["0x1b5e...","0x9c3f..."]</span></div>
+                  <div class="zkp-item"><span class="zkp-key">public_signals</span><span class="zkp-val">["1", "742", "1"]</span></div>
+                  <div class="zkp-item"><span class="zkp-key">timestamp</span><span class="zkp-val">"2026-02-19T08:14:33Z"</span></div>
+                  <div class="zkp-item"><span class="zkp-key">expiry</span><span class="zkp-val">"2026-08-19T00:00:00Z"</span></div>
+                </div>
+                <p style="font-size:0.65rem;color:var(--clay);line-height:1.7;">
+                  Cette preuve cryptographique confirme l'éligibilité sans révéler les données personnelles de l'agriculteur. La banque peut vérifier le résultat sans accéder aux informations sources.
+                </p>
+              </div>
+              <div>
+                <button class="zkp-verify-btn" onclick="verifyZKP()" style="background:rgba(61,107,60,0.1);border-color:rgba(61,107,60,0.3);color:var(--leaf);">
+                  ✓ Vérifier la preuve
+                </button>
+                <div id="zkpResult" class="zkp-result">
+                  ✅ Preuve valide — Score ≥ 600 · Eligible crédit · Données privées protégées
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: USSD -->
+<div class="page" id="page-ussd">
+  <div style="background:var(--soil);padding:2rem;text-align:center;border-bottom:2px solid rgba(200,151,42,0.2);">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--harvest);margin-bottom:0.5rem;">Interface Hors-Ligne</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:2rem;color:var(--cream);font-weight:600;">Simulateur USSD</h2>
+    <p style="font-size:0.7rem;color:rgba(212,230,195,0.6);margin-top:0.5rem;">Composez *750*1# pour accéder à Agri-Trust ID</p>
+  </div>
+  <div class="ussd-wrap">
+    <div>
+      <div class="phone-frame">
+        <div class="phone-screen">
+          <div class="phone-status">
+            <span>MTN BJ</span><span>●●●●○</span><span>11:32</span>
+          </div>
+          <div class="phone-content">
+            <div class="ussd-header" id="ussdHeader">AGRI-TRUST ID · *750*1#</div>
+            <div id="ussdContent">
+              <div class="ussd-line highlight">Bienvenue sur Agri-Trust ID</div>
+              <div class="ussd-line dim">─────────────────</div>
+              <div class="ussd-line">1. Consulter mon SCA</div>
+              <div class="ussd-line">2. Générer preuve ZKP</div>
+              <div class="ussd-line">3. Subventions disponibles</div>
+              <div class="ussd-line">4. Mettre à jour données</div>
+              <div class="ussd-line dim">─────────────────</div>
+              <div class="ussd-line dim">0. Quitter</div>
+            </div>
+            <div class="ussd-input-line">
+              <span class="ussd-prompt">&gt;</span>
+              <span id="ussdInput"></span>
+              <div class="ussd-cursor"></div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-keys">
+          <button class="phone-key" onclick="typeUSSD('1')">1</button>
+          <button class="phone-key" onclick="typeUSSD('2')">2</button>
+          <button class="phone-key" onclick="typeUSSD('3')">3</button>
+          <button class="phone-key" onclick="typeUSSD('4')">4</button>
+          <button class="phone-key" onclick="typeUSSD('5')">5</button>
+          <button class="phone-key" onclick="typeUSSD('6')">6</button>
+          <button class="phone-key" onclick="typeUSSD('7')">7</button>
+          <button class="phone-key" onclick="typeUSSD('8')">8</button>
+          <button class="phone-key" onclick="typeUSSD('9')">9</button>
+          <button class="phone-key end" onclick="resetUSSD()">✕</button>
+          <button class="phone-key" onclick="typeUSSD('0')">0</button>
+          <button class="phone-key call" onclick="sendUSSD()">✓</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ussd-info">
+      <h3>Accès sans smartphone ni internet</h3>
+      <p>Le flux USSD permet à tout agriculteur, même en zone rurale isolée, d'accéder à son profil Agri-Trust ID depuis n'importe quel téléphone basique (feature phone). L'authentification se fait par code PIN + biométrie vocale.</p>
+      <ul class="ussd-steps">
+        <li class="ussd-step"><div class="ussd-step-num">1</div><div>Composez <strong>*750*1#</strong> depuis votre mobile</div></li>
+        <li class="ussd-step"><div class="ussd-step-num">2</div><div>Entrez votre PIN à 6 chiffres lié à votre RAVIP</div></li>
+        <li class="ussd-step"><div class="ussd-step-num">3</div><div>Naviguez dans le menu pour consulter votre SCA ou générer une preuve ZKP</div></li>
+        <li class="ussd-step"><div class="ussd-step-num">4</div><div>Partagez le QR code sécurisé avec la banque ou l'agent de subvention</div></li>
+      </ul>
+      <div class="ussd-nav-btns">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.6rem;letter-spacing:0.1em;color:var(--clay);margin-bottom:0.4rem;text-transform:uppercase;">Scénarios de démonstration</div>
+        <button class="ussd-nav-btn active-flow" onclick="ussdFlow('score')">→ Consulter mon Score SCA</button>
+        <button class="ussd-nav-btn" onclick="ussdFlow('zkp')">→ Générer preuve pour banque</button>
+        <button class="ussd-nav-btn" onclick="ussdFlow('subsidy')">→ Subventions disponibles</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: ADMIN -->
+<div class="page" id="page-admin">
+  <div class="admin-topbar">
+    <div class="admin-topbar-title">🏛️ Tableau de bord — Administration MAEP</div>
+    <div style="font-size:0.6rem;color:var(--clay);">Accès: Direction Statistiques Agricoles · 22 Fév 2026</div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-val">14 872</div>
+      <div class="kpi-label">Agriculteurs enregistrés</div>
+      <div class="kpi-trend up">↑ +342 ce mois</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-val">11 204</div>
+      <div class="kpi-label">Scores SCA certifiés</div>
+      <div class="kpi-trend up">↑ 75,3% du total</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-val">89.4M</div>
+      <div class="kpi-label">FCFA subventions distribuées</div>
+      <div class="kpi-trend up">↑ Précision ciblage +32%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-val">2 341</div>
+      <div class="kpi-label">Crédits accordés via SCA</div>
+      <div class="kpi-trend down">Taux rejet: 18% (vs 58%)</div>
+    </div>
+  </div>
+
+  <div class="admin-content">
+    <div>
+      <div class="table-card">
+        <div class="table-head">
+          <span>Agriculteurs récents</span>
+          <input class="table-search" placeholder="Rechercher..." />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>NOM</th><th>COMMUNE</th><th>SCA</th><th>SUPERFICIE</th><th>STATUT</th><th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Amadou DOSSOU</strong><br><span style="font-size:0.55rem;color:var(--clay)">BJ-ATL-2024-048721</span></td>
+              <td>Bohicon, Zou</td>
+              <td><span class="score-pill high">742</span></td>
+              <td>3.8 ha</td>
+              <td><span class="score-pill high">CERTIFIÉ</span></td>
+              <td><button class="action-btn">Voir</button></td>
+            </tr>
+            <tr>
+              <td><strong>Fatoumata SÈHOU</strong><br><span style="font-size:0.55rem;color:var(--clay)">BJ-ATL-2024-051003</span></td>
+              <td>Abomey-Calavi</td>
+              <td><span class="score-pill med">624</span></td>
+              <td>2.1 ha</td>
+              <td><span class="score-pill high">CERTIFIÉ</span></td>
+              <td><button class="action-btn">Voir</button></td>
+            </tr>
+            <tr>
+              <td><strong>Kofi AGBOSSOU</strong><br><span style="font-size:0.55rem;color:var(--clay)">BJ-BOR-2025-002114</span></td>
+              <td>Parakou, Borgou</td>
+              <td><span class="score-pill med">541</span></td>
+              <td>5.2 ha</td>
+              <td><span class="score-pill med">EN COURS</span></td>
+              <td><button class="action-btn">Voir</button></td>
+            </tr>
+            <tr>
+              <td><strong>Adjoa KPADONOU</strong><br><span style="font-size:0.55rem;color:var(--clay)">BJ-ATL-2025-009873</span></td>
+              <td>Porto-Novo</td>
+              <td><span class="score-pill low">389</span></td>
+              <td>0.9 ha</td>
+              <td><span class="score-pill low">INSUFFISANT</span></td>
+              <td><button class="action-btn">Voir</button></td>
+            </tr>
+            <tr>
+              <td><strong>Sossou GBÉTCHÉDJI</strong><br><span style="font-size:0.55rem;color:var(--clay)">BJ-MON-2025-017421</span></td>
+              <td>Natitingou, Atacora</td>
+              <td><span class="score-pill high">801</span></td>
+              <td>8.4 ha</td>
+              <td><span class="score-pill high">CERTIFIÉ</span></td>
+              <td><button class="action-btn">Voir</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="distrib-card">
+        <div class="distrib-head">📦 Distribution en cours</div>
+        <div class="distrib-body">
+          <div class="distrib-item">
+            <div class="distrib-icon">🌱</div>
+            <div class="distrib-info">
+              <div class="distrib-name">Semences améliorées</div>
+              <div class="distrib-sub">3 214 / 4 000 bénéficiaires</div>
+              <div class="distrib-bar-wrap"><div class="distrib-bar" style="width:80%;"></div></div>
+            </div>
+            <div class="distrib-pct">80%</div>
+          </div>
+          <div class="distrib-item">
+            <div class="distrib-icon">🧴</div>
+            <div class="distrib-info">
+              <div class="distrib-name">Engrais subventionnés</div>
+              <div class="distrib-sub">6 871 / 10 000 bénéficiaires</div>
+              <div class="distrib-bar-wrap"><div class="distrib-bar" style="width:69%;"></div></div>
+            </div>
+            <div class="distrib-pct">69%</div>
+          </div>
+          <div class="distrib-item">
+            <div class="distrib-icon">🚜</div>
+            <div class="distrib-info">
+              <div class="distrib-name">Accès matériel agricole</div>
+              <div class="distrib-sub">412 / 800 bénéficiaires</div>
+              <div class="distrib-bar-wrap"><div class="distrib-bar" style="width:52%;"></div></div>
+            </div>
+            <div class="distrib-pct">52%</div>
+          </div>
+          <div class="distrib-item">
+            <div class="distrib-icon">💧</div>
+            <div class="distrib-info">
+              <div class="distrib-name">Équipements irrigation</div>
+              <div class="distrib-sub">189 / 500 bénéficiaires</div>
+              <div class="distrib-bar-wrap"><div class="distrib-bar" style="width:38%;"></div></div>
+            </div>
+            <div class="distrib-pct">38%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="distrib-card" style="margin-top:1rem;">
+        <div class="distrib-head">📊 Répartition des scores SCA</div>
+        <div class="distrib-body">
+          <canvas id="scoreChart" height="160"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: ABOUT -->
+<div class="page" id="page-about">
+  <div class="about-hero">
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--harvest);margin-bottom:1rem;">Digital ID Hackathon · 2025</div>
+    <h2>Et si les mathématiques pouvaient transformer une identité civile en identité économique certifiée ?</h2>
+    <p style="margin-top:1rem;">Agri-Trust ID est né d'un constat : au Bénin, un agriculteur peut nourrir toute une communauté et se voir refuser un microcrédit le lendemain, faute d'un profil économique vérifiable.</p>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-block">
+      <div class="about-block-icon">🎯</div>
+      <h4>Le problème</h4>
+      <p>Les exploitants agricoles béninois possèdent une identité civile (RAVIP) mais sont "numériquement invisibles" aux yeux des banques. Sans données certifiées, aucune institution ne peut évaluer leur solvabilité.</p>
+    </div>
+    <div class="about-block">
+      <div class="about-block-icon">💡</div>
+      <h4>Notre réponse</h4>
+      <p>Une couche DPI qui connecte l'identité nationale aux données terrain agricoles pour produire un Score de Confiance Agricole (SCA) certifié, vérifiable sans exposer les données privées.</p>
+    </div>
+    <div class="about-block">
+      <div class="about-block-icon">🔑</div>
+      <h4>Innovation clé : ZKP</h4>
+      <p>Les Preuves à Divulgation Nulle de Connaissance permettent à un agriculteur de prouver son éligibilité sans jamais révéler ses données personnelles. La vie privée et la confiance coexistent.</p>
+    </div>
+    <div class="about-block">
+      <div class="about-block-icon">🌍</div>
+      <h4>Vision UEMOA</h4>
+      <p>Un protocole open-source scalable à 8 pays et ~130 millions d'habitants. Contribution directe aux ODD 1, 2 et 8 : zéro pauvreté, zéro faim, travail décent.</p>
+    </div>
+  </div>
+
+  <div class="team-section">
+    <div class="team-title">Équipe — UNSTIM Agri-Data Secure · ENSGMM</div>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar">📊</div>
+        <div class="team-name">Spécialité MASF</div>
+        <div class="team-role">Modélisation & Analyse Statistique et Financière</div>
+        <div class="team-spec">Moteur de scoring SCA</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">🔐</div>
+        <div class="team-name">Spécialité MSN</div>
+        <div class="team-role">Mathématiques & Simulation Numérique</div>
+        <div class="team-spec">Couche ZKP · Cryptographie</div>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">🗺️</div>
+        <div class="team-name">Spécialité ILRO</div>
+        <div class="team-role">Ingénierie Logistique & Recherche Opérationnelle</div>
+        <div class="team-spec">Collecte terrain · USSD</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ZKP -->
+<div class="modal-overlay" id="zkpModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🔐 Génération Preuve ZKP</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>La preuve à divulgation nulle de connaissance est en cours de génération pour votre profil. Ce QR code peut être présenté à n'importe quelle institution financière partenaire.</p>
+      <div class="qr-placeholder" id="qrCode"></div>
+      <p style="text-align:center;font-size:0.6rem;color:var(--clay);">
+        Preuve valide 180 jours · Signé par ANIP · Expiry: 19 Août 2026
+      </p>
+      <button class="btn-primary" style="width:100%;margin-top:0.5rem;" onclick="closeModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong style="color:var(--harvest)">Agri-Trust ID</strong> · Prototype Digital ID Hackathon · ENSGMM/UNSTIM, Bénin · <span>UNSTIM Agri-Data Secure</span> · 2025
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// ─── NAVIGATION ───
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  const idx = ['home','dashboard','ussd','admin','about'].indexOf(id);
+  if (btns[idx]) btns[idx].classList.add('active');
+  if (id === 'dashboard') initDashboard();
+  if (id === 'admin') initAdmin();
+  window.scrollTo(0,0);
+}
+
+// ─── SCORE RING ───
+function initDashboard() {
+  const ring = document.getElementById('scoreRing');
+  if (!ring) return;
+  const circumference = 2 * Math.PI * 60;
+  const score = 742 / 1000;
+  setTimeout(() => {
+    ring.style.strokeDashoffset = circumference * (1 - score);
+  }, 100);
+
+  if (document.getElementById('yieldChart').chart) return;
+  const ctx = document.getElementById('yieldChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['2021','2022','2023','2024','2025'],
+      datasets: [{
+        label: 'Maïs (t/ha)',
+        data: [2.1, 2.4, 2.0, 2.7, 3.1],
+        backgroundColor: 'rgba(61,107,60,0.7)', borderRadius: 2,
+      },{
+        label: 'Manioc (t/ha)',
+        data: [8.2, 9.1, 8.8, 10.2, 11.4],
+        backgroundColor: 'rgba(200,151,42,0.7)', borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true, plugins: { legend: { labels: { font: { size: 9 } } } },
+      scales: {
+        x: { ticks: { font: { size: 9 } } },
+        y: { ticks: { font: { size: 9 } } }
+      }
+    }
+  });
+  document.getElementById('yieldChart').chart = chart;
+}
+
+// ─── ADMIN CHART ───
+function initAdmin() {
+  if (document.getElementById('scoreChart').chart) return;
+  const ctx = document.getElementById('scoreChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Excellent (800-1000)','Fiable (600-799)','Moyen (400-599)','Insuffisant (<400)'],
+      datasets: [{
+        data: [18, 42, 28, 12],
+        backgroundColor: ['#3D6B3C','#6A9E5A','#C8972A','#A0522D'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { font: { size: 9 } } } }
+    }
+  });
+  document.getElementById('scoreChart').chart = chart;
+}
+
+// ─── USSD SIMULATOR ───
+let ussdState = 'menu';
+let ussdBuffer = '';
+
+const ussdFlows = {
+  menu: `<div class="ussd-line highlight">Bienvenue sur Agri-Trust ID</div>
+<div class="ussd-line dim">─────────────────</div>
+<div class="ussd-line">1. Consulter mon SCA</div>
+<div class="ussd-line">2. Générer preuve ZKP</div>
+<div class="ussd-line">3. Subventions disponibles</div>
+<div class="ussd-line">4. Mettre à jour données</div>
+<div class="ussd-line dim">─────────────────</div>
+<div class="ussd-line dim">0. Quitter</div>`,
+  score: `<div class="ussd-line highlight">◆ VOTRE SCORE SCA</div>
+<div class="ussd-line dim">─────────────────</div>
+<div class="ussd-line">Nom: DOSSOU Amadou</div>
+<div class="ussd-line">SCA: <span style="color:var(--harvest)">742 / 1000</span></div>
+<div class="ussd-line">Statut: CERTIFIÉ ✓</div>
+<div class="ussd-line">Crédit max: 750 000 FCFA</div>
+<div class="ussd-line">Expire: 19/08/2026</div>
+<div class="ussd-line dim">─────────────────</div>
+<div class="ussd-line">0. Retour menu</div>`,
+  zkp: `<div class="ussd-line highlight">◆ PREUVE ZKP</div>
+<div class="ussd-line dim">─────────────────</div>
+<div class="ussd-line">Génération en cours...</div>
+<div class="ussd-line" style="color:var(--harvest)">QR Code: #A7F3-9B2C</div>
+<div class="ussd-line">Validité: 180 jours</div>
+<div class="ussd-line">Données: NON exposées ✓</div>
+<div class="ussd-line dim">─────────────────</div>
+<div class="ussd-line dim">Montrez ce code à votre</div>
+<div class="ussd-line dim">institution financière</div>
+<div class="ussd-line">0. Retour menu</div>`,
+  subsidy: `<div class="ussd-line highlight">◆ SUBVENTIONS</div>
+<div class="ussd-line dim">─────────────────</div>
+<div class="ussd-line">1. Semences améliorées</div>
+<div class="ussd-line">   → 45 000 FCFA DISPO</div>
+<div class="ussd-line">2. Engrais NPK</div>
+<div class="ussd-line">   → EN COURS</div>
+<div class="ussd-line">3. Formation technique</div>
+<div class="ussd-line">   → 12 Mars 2026</div>
+<div class="ussd-line dim">─────────────────</div>
+<div class="ussd-line">0. Retour menu</div>`
+};
+
+function typeUSSD(char) {
+  ussdBuffer += char;
+  document.getElementById('ussdInput').textContent = ussdBuffer;
+}
+
+function sendUSSD() {
+  const input = ussdBuffer.trim();
+  ussdBuffer = '';
+  document.getElementById('ussdInput').textContent = '';
+  if (input === '1') ussdFlow('score');
+  else if (input === '2') ussdFlow('zkp');
+  else if (input === '3') ussdFlow('subsidy');
+  else if (input === '0') ussdFlow('menu');
+  else ussdFlow('menu');
+}
+
+function resetUSSD() {
+  ussdBuffer = '';
+  document.getElementById('ussdInput').textContent = '';
+  ussdFlow('menu');
+}
+
+function ussdFlow(state) {
+  document.querySelectorAll('.ussd-nav-btn').forEach(b => b.classList.remove('active-flow'));
+  document.getElementById('ussdContent').innerHTML = ussdFlows[state] || ussdFlows.menu;
+  document.getElementById('ussdHeader').textContent = 
+    state === 'menu' ? 'AGRI-TRUST ID · *750*1#' :
+    state === 'score' ? 'SCORE SCA · *750*1*1#' :
+    state === 'zkp' ? 'PREUVE ZKP · *750*1*2#' :
+    'SUBVENTIONS · *750*1*3#';
+}
+
+// ─── ZKP ───
+function verifyZKP() {
+  const result = document.getElementById('zkpResult');
+  result.style.display = 'block';
+}
+
+// ─── MODAL ───
+function openModal() {
+  const modal = document.getElementById('zkpModal');
+  modal.classList.add('open');
+  const qr = document.getElementById('qrCode');
+  qr.innerHTML = '';
+  for (let i = 0; i < 100; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'qr-cell' + (Math.random() > 0.45 ? ' dark' : '');
+    qr.appendChild(cell);
+  }
+}
+function closeModal() {
+  document.getElementById('zkpModal').classList.remove('open');
+}
+
+// init score ring on load if dashboard visible
+document.addEventListener('DOMContentLoaded', () => {
+  // warm up ring on first dash visit
+});
+</script>
+</body>
+</html>
